@@ -79,10 +79,12 @@ Dưới đây là lộ trình các bước kỹ thuật cần làm để trainin
 - [ ] Lưu model đã train ra file (ví dụ `.pkl`) để sử dụng.
 
 ---
-*File được tạo tự động hỗ trợ cho dự án Diabetes Prediction.*
----
 
 ## 4. Web Portal (Django)
+
+<p align="center">
+  <img src="templates/Portal_predict.jpg" alt="Diabetes Prediction Web Portal" width="800">
+</p>
 
 This repository now includes a Django web portal that mirrors the structure of the
 ml-deployment-starter project.
