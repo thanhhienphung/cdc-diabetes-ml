@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CDC Diabetes Risk Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f6f1e8;
+        --ink: #1c1d22;
+        --muted: #52545f;
+        --card: #ffffff;
+        --accent: #e8672f;
+        --accent-2: #1f8a70;
+        --accent-3: #2459d1;
+        --shadow: 0 20px 50px rgba(28, 29, 34, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "DM Sans", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top, #fff2df 0%, #f7efe3 35%, #ede3d6 100%);
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        width: 480px;
+        height: 480px;
+        border-radius: 50%;
+        filter: blur(40px);
+        opacity: 0.35;
+        z-index: -1;
+      }
+
+      body::before {
+        top: -120px;
+        right: -120px;
+        background: radial-gradient(circle, #f9b07b 0%, rgba(249, 176, 123, 0) 70%);
+      }
+
+      body::after {
+        bottom: -180px;
+        left: -140px;
+        background: radial-gradient(circle, #9ad7c6 0%, rgba(154, 215, 198, 0) 70%);
+      }
+
+      .shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 48px 24px 72px;
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        border: 1px solid rgba(28, 29, 34, 0.08);
+        pointer-events: none;
+      }
+
+      .intro {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        animation: rise 700ms ease both;
+      }
+
+      .intro h1 {
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        font-size: clamp(2rem, 2.5vw + 1.5rem, 3rem);
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+
+      .intro p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .intro .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .chip {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(36, 89, 209, 0.12);
+        color: var(--accent-3);
+        font-weight: 600;
+      }
+
+      .form-card {
+        animation: rise 700ms ease both;
+        animation-delay: 120ms;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      input {
+        border-radius: 12px;
+        border: 1px solid rgba(28, 29, 34, 0.15);
+        padding: 10px 12px;
+        font-size: 0.95rem;
+        font-family: "DM Sans", "Segoe UI", sans-serif;
+      }
+
+      input:focus {
+        outline: 2px solid rgba(31, 138, 112, 0.3);
+        border-color: var(--accent-2);
+      }
+
+      .hint {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(232, 103, 47, 0.28);
+      }
+
+      button.ghost {
+        background: #f1f1f4;
+        color: var(--ink);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .result {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: 18px;
+        background: #f7f7f9;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .result.hidden {
+        display: none;
+      }
+
+      .status {
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 8px 12px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status.low {
+        background: rgba(31, 138, 112, 0.12);
+        color: var(--accent-2);
+      }
+
+      .status.medium {
+        background: rgba(232, 103, 47, 0.12);
+        color: #b24b1c;
+      }
+
+      .status.high {
+        background: rgba(226, 73, 63, 0.12);
+        color: #b53028;
+      }
+
+      .probabilities {
+        display: grid;
+        gap: 6px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .error {
+        color: #b53028;
+        font-weight: 600;
+      }
+
+      .meta {
+        font-size: 0.85rem;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 720px) {
+        .shell {
+          padding: 32px 18px 56px;
+        }
+
+        .actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="card intro">
+        <div class="chips">
+          <span class="chip">CDC BRFSS 2015</span>
+          <span class="chip">21 features</span>
+          <span class="chip">3 risk classes</span>
+        </div>
+        <h1>Diabetes Risk Screening Portal</h1>
+        <p>
+          Enter the health indicators below to estimate diabetes risk. This portal
+          sends the feature vector to a local model and returns a prediction plus
+          class probabilities.
+        </p>
+        <p class="meta">
+          Target output is Diabetes_012: 0 = non-diabetic, 1 = pre-diabetic,
+          2 = diabetic.
+        </p>
+      </section>
+
+      <section class="card form-card">
+        <form id="predict-form">
+          <div class="grid">
+            <div class="field">
+              <label for="HighBP">HighBP</label>
+              <input id="HighBP" name="HighBP" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = không bị/từng được chẩn đoán cao huyết áp, 1 = có</span>
+            </div>
+            <div class="field">
+              <label for="HighChol">HighChol</label>
+              <input id="HighChol" name="HighChol" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = không bị/từng được chẩn đoán cholesterol cao, 1 = có</span>
+            </div>
+            <div class="field">
+              <label for="CholCheck">CholCheck</label>
+              <input id="CholCheck" name="CholCheck" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = chưa kiểm tra cholesterol trong 5 năm qua, 1 = đã kiểm tra</span>
+            </div>
+            <div class="field">
+              <label for="BMI">BMI</label>
+              <input id="BMI" name="BMI" type="number" min="10" max="80" step="0.1" required />
+              <span class="hint">Chỉ số BMI = cân nặng (kg) / chiều cao (m)^2, ví dụ 23.5</span>
+            </div>
+            <div class="field">
+              <label for="Smoker">Smoker</label>
+              <input id="Smoker" name="Smoker" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = chưa từng hút đủ 100 điếu, 1 = đã từng hút &gt;= 100 điếu</span>
+            </div>
+            <div class="field">
+              <label for="Stroke">Stroke</label>
+              <input id="Stroke" name="Stroke" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = chưa từng bị đột quỵ, 1 = đã từng bị đột quỵ</span>
+            </div>
+            <div class="field">
+              <label for="HeartDiseaseorAttack">HeartDiseaseorAttack</label>
+              <input
+                id="HeartDiseaseorAttack"
+                name="HeartDiseaseorAttack"
+                type="number"
+                min="0"
+                max="1"
+                step="1"
+                required
+              />
+              <span class="hint">0 = chưa từng bệnh tim/nhồi máu cơ tim, 1 = đã từng</span>
+            </div>
+            <div class="field">
+              <label for="PhysActivity">PhysActivity</label>
+              <input id="PhysActivity" name="PhysActivity" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = không vận động thể chất trong 30 ngày qua, 1 = có vận động</span>
+            </div>
+            <div class="field">
+              <label for="Fruits">Fruits</label>
+              <input id="Fruits" name="Fruits" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = không ăn trái cây hằng ngày, 1 = có ăn ít nhất 1 lần/ngày</span>
+            </div>
+            <div class="field">
+              <label for="Veggies">Veggies</label>
+              <input id="Veggies" name="Veggies" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = không ăn rau hằng ngày, 1 = có ăn ít nhất 1 lần/ngày</span>
+            </div>
+            <div class="field">
+              <label for="HvyAlcoholConsump">HvyAlcoholConsump</label>
+              <input
+                id="HvyAlcoholConsump"
+                name="HvyAlcoholConsump"
+                type="number"
+                min="0"
+                max="1"
+                step="1"
+                required
+              />
+              <span class="hint">0 = không uống rượu bia nhiều, 1 = uống nhiều (theo định nghĩa khảo sát)</span>
+            </div>
+            <div class="field">
+              <label for="AnyHealthcare">AnyHealthcare</label>
+              <input
+                id="AnyHealthcare"
+                name="AnyHealthcare"
+                type="number"
+                min="0"
+                max="1"
+                step="1"
+                required
+              />
+              <span class="hint">0 = không có bảo hiểm/chăm sóc y tế, 1 = có</span>
+            </div>
+            <div class="field">
+              <label for="NoDocbcCost">NoDocbcCost</label>
+              <input
+                id="NoDocbcCost"
+                name="NoDocbcCost"
+                type="number"
+                min="0"
+                max="1"
+                step="1"
+                required
+              />
+              <span class="hint">0 = không bỏ qua khám bác sĩ vì chi phí, 1 = từng bỏ qua vì chi phí</span>
+            </div>
+            <div class="field">
+              <label for="GenHlth">GenHlth</label>
+              <input id="GenHlth" name="GenHlth" type="number" min="1" max="5" step="1" required />
+              <span class="hint">Tự đánh giá sức khỏe chung: 1 = rất tốt, 2 = tốt, 3 = bình thường, 4 = kém, 5 = rất kém</span>
+            </div>
+            <div class="field">
+              <label for="MentHlth">MentHlth</label>
+              <input id="MentHlth" name="MentHlth" type="number" min="0" max="30" step="1" required />
+              <span class="hint">Số ngày sức khỏe tinh thần không tốt trong 30 ngày gần nhất (0-30)</span>
+            </div>
+            <div class="field">
+              <label for="PhysHlth">PhysHlth</label>
+              <input id="PhysHlth" name="PhysHlth" type="number" min="0" max="30" step="1" required />
+              <span class="hint">Số ngày sức khỏe thể chất không tốt trong 30 ngày gần nhất (0-30)</span>
+            </div>
+            <div class="field">
+              <label for="DiffWalk">DiffWalk</label>
+              <input id="DiffWalk" name="DiffWalk" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = không khó đi bộ/leo cầu thang, 1 = có khó khăn</span>
+            </div>
+            <div class="field">
+              <label for="Sex">Sex</label>
+              <input id="Sex" name="Sex" type="number" min="0" max="1" step="1" required />
+              <span class="hint">0 = nữ, 1 = nam</span>
+            </div>
+            <div class="field">
+              <label for="Age">Age</label>
+              <input id="Age" name="Age" type="number" min="1" max="13" step="1" required />
+              <span class="hint">Nhóm tuổi: 1 = 18-24, 2 = 25-29, ... 13 = 80+</span>
+            </div>
+            <div class="field">
+              <label for="Education">Education</label>
+              <input id="Education" name="Education" type="number" min="1" max="6" step="1" required />
+              <span class="hint">Trình độ học vấn: 1 = chưa hết THCS, 2 = THCS, 3 = THPT, 4 = cao đẳng, 5 = đại học, 6 = sau đại học</span>
+            </div>
+            <div class="field">
+              <label for="Income">Income</label>
+              <input id="Income" name="Income" type="number" min="1" max="8" step="1" required />
+              <span class="hint">Thu nhập hộ gia đình: 1 = thấp nhất, ... 8 = cao nhất</span>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="ghost" type="button" id="fill-sample">Fill sample</button>
+            <button class="primary" type="submit" id="submit-btn">Run prediction</button>
+          </div>
+          <div class="error" id="error"></div>
+        </form>
+
+        <div class="result hidden" id="result">
+          <div class="status" id="status">Result</div>
+          <div id="label"></div>
+          <div class="probabilities" id="probabilities"></div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const featureNames = [
+        'HighBP',
+        'HighChol',
+        'CholCheck',
+        'BMI',
+        'Smoker',
+        'Stroke',
+        'HeartDiseaseorAttack',
+        'PhysActivity',
+        'Fruits',
+        'Veggies',
+        'HvyAlcoholConsump',
+        'AnyHealthcare',
+        'NoDocbcCost',
+        'GenHlth',
+        'MentHlth',
+        'PhysHlth',
+        'DiffWalk',
+        'Sex',
+        'Age',
+        'Education',
+        'Income',
+      ];
+
+      const sampleValues = {
+        HighBP: 1,
+        HighChol: 1,
+        CholCheck: 1,
+        BMI: 31.4,
+        Smoker: 0,
+        Stroke: 0,
+        HeartDiseaseorAttack: 0,
+        PhysActivity: 1,
+        Fruits: 1,
+        Veggies: 1,
+        HvyAlcoholConsump: 0,
+        AnyHealthcare: 1,
+        NoDocbcCost: 0,
+        GenHlth: 3,
+        MentHlth: 2,
+        PhysHlth: 4,
+        DiffWalk: 0,
+        Sex: 1,
+        Age: 8,
+        Education: 4,
+        Income: 5,
+      };
+
+      const form = document.getElementById('predict-form');
+      const errorEl = document.getElementById('error');
+      const resultEl = document.getElementById('result');
+      const statusEl = document.getElementById('status');
+      const labelEl = document.getElementById('label');
+      const probsEl = document.getElementById('probabilities');
+      const submitBtn = document.getElementById('submit-btn');
+      const fillBtn = document.getElementById('fill-sample');
+
+      function collectFeatures() {
+        const features = {};
+        const missing = [];
+        for (const name of featureNames) {
+          const input = form.elements[name];
+          const raw = input.value.trim();
+          if (!raw) {
+            missing.push(name);
+            continue;
+          }
+          const value = Number(raw);
+          if (Number.isNaN(value)) {
+            missing.push(name);
+            continue;
+          }
+          features[name] = value;
+        }
+        if (missing.length) {
+          throw new Error(`Missing or invalid values: ${missing.join(', ')}`);
+        }
+        return features;
+      }
+
+      function formatLabel(raw) {
+        if (!raw) {
+          return '';
+        }
+        return raw
+          .split('-')
+          .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+          .join('-');
+      }
+
+      fillBtn.addEventListener('click', () => {
+        for (const name of featureNames) {
+          if (sampleValues[name] !== undefined) {
+            form.elements[name].value = sampleValues[name];
+          }
+        }
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        errorEl.textContent = '';
+        resultEl.classList.add('hidden');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Running...';
+
+        try {
+          const features = collectFeatures();
+          const response = await fetch('/api/diabetes-predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ features }),
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Prediction failed');
+          }
+
+          const risk = Number(data.prediction);
+          const riskMap = {
+            0: { label: 'Low risk', className: 'low' },
+            1: { label: 'Medium risk', className: 'medium' },
+            2: { label: 'High risk', className: 'high' },
+          };
+
+          const riskInfo = riskMap[risk] || { label: 'Unknown', className: 'medium' };
+          statusEl.textContent = riskInfo.label;
+          statusEl.className = `status ${riskInfo.className}`;
+          labelEl.textContent = `Model label: ${formatLabel(data.label || String(risk))}`;
+
+          probsEl.innerHTML = '';
+          if (data.probabilities) {
+            for (const [label, prob] of Object.entries(data.probabilities)) {
+              const line = document.createElement('div');
+              line.textContent = `Class ${label}: ${(prob * 100).toFixed(1)}%`;
+              probsEl.appendChild(line);
+            }
+          }
+
+          resultEl.classList.remove('hidden');
+        } catch (err) {
+          errorEl.textContent = err.message;
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Run prediction';
+        }
+      });
+    </script>
+  </body>
+</html>
